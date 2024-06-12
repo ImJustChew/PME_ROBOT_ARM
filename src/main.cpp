@@ -74,20 +74,6 @@ void loop() {
     // A1訊號已觸發，將第二軸伺服馬達設置為初始位置
     servo2.write(servo2InitAngle);
   }
-
-  // if (mySerial.available()) {
-  //   char command = mySerial.read();  // 讀取收到的訊號
-  //   if (command == 'A') {
-  //     // 執行指定動作序列
-  //     executeSequence();
-  //   } else if (isdigit(command)) {
-  //     // 如果收到的是數字，則控制旋轉伺服馬達的角度
-  //     int angle = command - '0';  // 將字元轉換為數字
-  //     angle = map(angle, 0, 9, rotationMinAngle, rotationMaxAngle);  // 將數字映射到角度範圍
-  //     servo3.write(angle);  // 控制旋轉伺服馬達的角度
-  //     delay(1500);  // 延遲以穩定伺服馬達
-  //   }
-  // }
 }
 
 void setInitialPositions() {
@@ -124,7 +110,7 @@ void commandCallback(const std_msgs::Int32& msg) {
   // 3 digit: 1st, 2nd digit: theta angle, 3rd digit: execute sequence, example: 45deg, execute = 451;
   int command = msg.data;
   int angle = command / 10;
-  int execute = command % 10;
+  int execute = abs(command % 10);
 
   if (angle >= -60 && angle <= 60) {
     servo3.write(angle);
