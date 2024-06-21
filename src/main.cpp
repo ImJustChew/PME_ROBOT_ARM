@@ -54,26 +54,6 @@ void setup() {
 
 void loop() {
   nh.spinOnce();
-
-  if (analogRead(A0) <= 500) {
-    // 第一軸順時針旋轉直到觸發A0訊號
-    currentAngle1 = (currentAngle1 + 1) % 180;
-    servo1.write(currentAngle1);
-    delay(20);  // 控制旋轉速度
-  } else {
-    // A0訊號已觸發，將第一軸伺服馬達設置為初始位置
-    servo1.write(servo1InitAngle);
-  }
-
-  if (analogRead(A1) <= 500) {
-    // 第二軸逆時針旋轉直到觸發A1訊號
-    currentAngle2 = (currentAngle2 - 1 + 180) % 180;
-    servo2.write(currentAngle2);
-    delay(20);  // 控制旋轉速度
-  } else {
-    // A1訊號已觸發，將第二軸伺服馬達設置為初始位置
-    servo2.write(servo2InitAngle);
-  }
 }
 
 void setInitialPositions() {
@@ -82,28 +62,52 @@ void setInitialPositions() {
 }
 
 void executeSequence() {
-  // 第一軸伺服馬達逆時針旋轉90度
-  servo1.write(-90);  // 逆時針旋轉
-  delay(1500);  // 等待1500毫秒
+  int currentAngle1 = servo1InitAngle;
+  int currentAngle2 = servo2InitAngle;
+  
+  while(true) {// 第一軸伺服馬達逆時針旋轉90度
+    // Serial.print(currentAngle1);
+    // Serial.print(" ");
+    // Serial.print(currentAngle2);
+    // Serial.print(" ");
+    // Serial.println(" going up down ");
+    // 第一軸順時針旋轉直到觸發A0訊號
+    currentAngle1 = (currentAngle1 + 1) % 180;
+    servo1.write(currentAngle1);
+    // 第二軸逆時針旋轉直到觸發A1訊號
+    currentAngle2 = (currentAngle2 - 1 + 180) % 180;
+    servo2.write(currentAngle2);
+    delay(20);  // 控制旋轉速度
+    if(currentAngle1 == 170 && currentAngle2 == 10) { 
+      // A0訊號已觸發，將第一軸伺服馬達設置為初始位置
+      break;
+    }
 
-  // 第二軸伺服馬達順時針旋轉90度
-  servo2.write(90);  // 順時針旋轉
-  delay(1500);  // 等待1500毫秒
-
+    // 第二軸伺服馬達順時針旋轉90度
+    if (analogRead(A1) <= 500) {
+    } else {
+      // A1訊號已觸發，將第二軸伺服馬達設置為初始位置
+      break;
+    }
+  }
+  // Serial.println(" sucking ");
   // 打開真空馬達
-  digitalWrite(vacuumMotorPin, HIGH);
+  digitalWrite(vacuumMotorPin, LOW);  // 送出5V電壓
   delay(1000);  // 等待1000毫秒
 
-  // 第二軸伺服馬達回到初始位置
-  servo2.write(servo2InitAngle);
-  delay(1500);  // 等待1500毫秒
+
+  servo2.write(45);
+  delay(500);
+  servo1.write(-45);
+  delay(4000);  // 等待4000毫秒
 
   // 第一軸伺服馬達回到初始位置
-  servo1.write(servo1InitAngle);
-  delay(1500);  // 等待1500毫秒
+  //servo1.write(servo1InitAngle);
+  //delay(1500);  // 等待1500毫秒
 
   // 關閉真空馬達
-  digitalWrite(vacuumMotorPin, LOW);
+    Serial.println(" unsuck ");
+  digitalWrite(vacuumMotorPin, HIGH);  // 停止送出5V電壓
 }
 
 void commandCallback(const std_msgs::Int32& msg) {
